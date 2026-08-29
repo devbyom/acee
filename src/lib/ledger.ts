@@ -46,13 +46,15 @@ function genId(prefix: string): string {
 // ---------- Payments / generic transactions ----------
 
 export function createPayment(input: {
+  id?: string;
   sender: string;
   recipient: string;
   amount: string;
   asset: string;
+  onchainTxHash?: string;
 }): Transaction {
   const tx: Transaction = {
-    id: genId("pay"),
+    id: input.id || genId("pay"),
     type: "payment",
     sender: input.sender.toLowerCase(),
     recipient: input.recipient,
@@ -60,9 +62,24 @@ export function createPayment(input: {
     asset: input.asset,
     timestamp: Date.now(),
     status: "pending",
+    claimed: false,
+    onchainTxHash: input.onchainTxHash,
   };
   store().transactions.set(tx.id, tx);
   return tx;
+}
+
+export function markPaymentClaimed(id: string, claimTxHash?: string): Transaction | undefined {
+  const s = store();
+  const tx = s.transactions.get(id);
+  if (tx) {
+    tx.claimed = true;
+    tx.status = "confirmed";
+    if (claimTxHash) tx.claimTxHash = claimTxHash;
+    s.transactions.set(id, tx);
+    return tx;
+  }
+  return undefined;
 }
 
 export function recordPredictionTransaction(input: {

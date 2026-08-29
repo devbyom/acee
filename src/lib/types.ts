@@ -19,6 +19,10 @@ export interface Transaction {
   batchId?: number;
   // For predictions: the public external-market execution record (if any).
   execution?: ExecutionRecord;
+  // For on-chain escrow payments:
+  claimed?: boolean;
+  onchainTxHash?: string;
+  claimTxHash?: string;
 }
 
 export interface PredictionIntent {

@@ -21,7 +21,7 @@ import {
   ExternalLink,
   Copy,
   Check,
-  CheckCircle2,
+  ArrowDownLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,7 @@ import { SendDialog } from "@/components/send-dialog";
 import { PredictionDialog } from "@/components/prediction-dialog";
 import { SettleDialog } from "@/components/settle-dialog";
 import { FaucetDialog } from "@/components/faucet-dialog";
+import { ClaimDialog } from "@/components/claim-dialog";
 import { ActivityItem } from "@/components/activity-item";
 import { TrustModel } from "@/components/trust-model";
 import { Canvas3DScene } from "@/components/canvas-3d-scene";
@@ -55,9 +56,10 @@ export default function Dashboard() {
   const [predictOpen, setPredictOpen] = useState(false);
   const [settleOpen, setSettleOpen] = useState(false);
   const [faucetOpen, setFaucetOpen] = useState(false);
+  const [selectedClaimTx, setSelectedClaimTx] = useState<Transaction | null>(null);
   const [txs, setTxs] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<"activity" | "settle" | "merkle" | "markets" | "trust">("activity");
-  const [txFilter, setTxFilter] = useState<"all" | "payment" | "prediction">("all");
+  const [txFilter, setTxFilter] = useState<"all" | "claimable" | "payment" | "prediction">("all");
   const [copiedContract, setCopiedContract] = useState<string | null>(null);
 
   const copy = (text: string, id: string) => {
@@ -80,11 +82,29 @@ export default function Dashboard() {
 
   const payments = txs.filter((t) => t.type === "payment");
   const predictions = txs.filter((t) => t.type === "prediction");
+  const claimablePayments = txs.filter(
+    (t) =>
+      t.type === "payment" &&
+      t.recipient?.toLowerCase() === address?.toLowerCase() &&
+      !t.claimed
+  );
+  const totalClaimableUsdc = claimablePayments.reduce(
+    (sum, t) => sum + (t.asset === "USDC" ? Number(t.amount || 0) : 0),
+    0
+  );
+
   const settledBatchIds = new Set(
     txs.filter((t) => t.batchId && (t.status === "confirmed" || t.status === "batched")).map((t) => t.batchId)
   );
 
   const filteredTxs = txs.filter((t) => {
+    if (txFilter === "claimable") {
+      return (
+        t.type === "payment" &&
+        t.recipient?.toLowerCase() === address?.toLowerCase() &&
+        !t.claimed
+      );
+    }
     if (txFilter === "payment") return t.type === "payment";
     if (txFilter === "prediction") return t.type === "prediction";
     return true;
@@ -153,6 +173,44 @@ export default function Dashboard() {
           </div>
         </header>
 
+        {/* Claimable Escrow Banner (shows when user has pending incoming escrow) */}
+        {isConnected && claimablePayments.length > 0 && (
+          <div
+            style={{ borderRadius: "2px" }}
+            className="border border-[#298dff]/40 bg-[#298dff]/[0.08] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-[0_0_25px_rgba(41,141,255,0.15)]"
+          >
+            <div className="flex items-center gap-3">
+              <div
+                style={{ borderRadius: "2px" }}
+                className="flex h-9 w-9 items-center justify-center bg-[#298dff] text-white shrink-0 shadow-[0_0_15px_rgba(41,141,255,0.4)]"
+              >
+                <Coins className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+                  Claimable Escrow Available
+                  <Badge variant="default" className="text-[9px] bg-[#298dff] text-white">
+                    {claimablePayments.length} Pending
+                  </Badge>
+                </h4>
+                <p className="text-xs text-text-secondary">
+                  You have <strong className="text-[#54a6ff] mono font-bold">${totalClaimableUsdc} USDC</strong> ready to claim from the AcePayment escrow contract.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => setSelectedClaimTx(claimablePayments[0])}
+                className="h-8 text-xs bg-[#298dff] hover:bg-[#1a7ae6] text-white shadow-[0_0_15px_rgba(41,141,255,0.3)] font-medium"
+              >
+                <Coins className="h-3.5 w-3.5 mr-1" /> Claim USDC Now
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* 3D Interactive Hero Section */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-2">
           <div className="lg:col-span-6 space-y-5">
@@ -180,7 +238,7 @@ export default function Dashboard() {
                 onClick={() => setSendOpen(true)}
                 className="font-medium text-sm bg-[#298dff] hover:bg-[#1a7ae6] text-white shadow-[0_0_25px_rgba(41,141,255,0.4)]"
               >
-                <Send className="h-4 w-4 mr-1.5" /> Send Confidentially
+                <Send className="h-4 w-4 mr-1.5" /> Send &amp; Escrow USDC
               </Button>
               <Button
                 variant="outline"
@@ -196,9 +254,9 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div className="border border-[#1c2026] bg-[#0d0f12] p-3 space-y-1" style={{ borderRadius: "2px" }}>
                 <div className="flex items-center gap-1.5 text-xs font-medium text-text-primary">
-                  <ShieldCheck className="h-3.5 w-3.5 text-[#298dff]" /> Stealth State
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#298dff]" /> Escrow Protection
                 </div>
-                <p className="text-[11px] text-text-secondary">Off-chain ledgers shield metadata before rollup.</p>
+                <p className="text-[11px] text-text-secondary">Approve &amp; deposit USDC into Monad smart contract.</p>
               </div>
               <div className="border border-[#1c2026] bg-[#0d0f12] p-3 space-y-1" style={{ borderRadius: "2px" }}>
                 <div className="flex items-center gap-1.5 text-xs font-medium text-text-primary">
@@ -230,10 +288,10 @@ export default function Dashboard() {
             subtitle="Confidential Intents"
           />
           <StatCard
-            icon={<TrendingUp className="h-4 w-4 text-[#54a6ff]" />}
-            label="Predictions"
-            value={String(predictions.length)}
-            subtitle="Relayed Positions"
+            icon={<Coins className="h-4 w-4 text-[#54a6ff]" />}
+            label="Claimable Escrows"
+            value={String(claimablePayments.length)}
+            subtitle={claimablePayments.length > 0 ? `$${totalClaimableUsdc} USDC` : "No pending claims"}
           />
           <StatCard
             icon={<Layers className="h-4 w-4 text-[#298dff]" />}
@@ -246,9 +304,9 @@ export default function Dashboard() {
         {/* Quick Action Cards */}
         <section className="grid gap-3 sm:grid-cols-3">
           <ActionCard
-            title="Private Send"
-            subtitle="Encrypted peer-to-peer transfer"
-            badge="Confidential"
+            title="Send &amp; Escrow"
+            subtitle="Approve &amp; deposit USDC into escrow"
+            badge="On-Chain Escrow"
             icon={<Send className="h-4 w-4" />}
             onClick={() => setSendOpen(true)}
           />
@@ -281,7 +339,7 @@ export default function Dashboard() {
                     : "text-text-secondary hover:text-text-primary"
                 }`}
               >
-                <Activity className="h-3 w-3" /> Activity Log
+                <Activity className="h-3 w-3" /> Activity &amp; Escrows
               </button>
               <button
                 onClick={() => setActiveTab("settle")}
@@ -341,12 +399,12 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Tab 1: Activity Log */}
+          {/* Tab 1: Activity Log & Escrows */}
           {activeTab === "activity" && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  {(["all", "payment", "prediction"] as const).map((filter) => (
+                  {(["all", "claimable", "payment", "prediction"] as const).map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setTxFilter(filter)}
@@ -357,7 +415,11 @@ export default function Dashboard() {
                           : "border-[#1c2026] bg-[#0d0f12] text-text-muted hover:text-text-secondary"
                       }`}
                     >
-                      {filter === "all" ? "All Activity" : `${filter}s`}
+                      {filter === "all"
+                        ? "All Activity"
+                        : filter === "claimable"
+                        ? `Claimable (${claimablePayments.length})`
+                        : `${filter}s`}
                     </button>
                   ))}
                 </div>
@@ -370,9 +432,13 @@ export default function Dashboard() {
                     <div className="flex h-10 w-10 items-center justify-center bg-[#298dff]/10 text-[#298dff] mx-auto" style={{ borderRadius: "2px" }}>
                       <Activity className="h-5 w-5" />
                     </div>
-                    <h3 className="text-sm font-medium text-text-primary">No Activity Recorded</h3>
+                    <h3 className="text-sm font-medium text-text-primary">
+                      {txFilter === "claimable" ? "No Claimable Escrows" : "No Activity Recorded"}
+                    </h3>
                     <p className="text-xs text-text-secondary max-w-sm mx-auto">
-                      Send a private payment or take a confidential prediction market position to populate the ledger.
+                      {txFilter === "claimable"
+                        ? "You have claimed all incoming USDC payments."
+                        : "Send a private escrow payment or take a confidential prediction position to populate the ledger."}
                     </p>
                     <div className="flex justify-center gap-2.5 pt-1">
                       <Button size="sm" onClick={() => setSendOpen(true)}>
@@ -384,7 +450,9 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ) : (
-                  filteredTxs.map((tx) => <ActivityItem key={tx.id} tx={tx} />)
+                  filteredTxs.map((tx) => (
+                    <ActivityItem key={tx.id} tx={tx} onClaimed={refresh} />
+                  ))
                 )}
               </div>
             </div>
@@ -535,6 +603,14 @@ export default function Dashboard() {
       <PredictionDialog open={predictOpen} onOpenChange={setPredictOpen} onExecuted={refresh} />
       <SettleDialog open={settleOpen} onOpenChange={setSettleOpen} onSettled={refresh} />
       <FaucetDialog open={faucetOpen} onOpenChange={setFaucetOpen} />
+      <ClaimDialog
+        tx={selectedClaimTx}
+        open={Boolean(selectedClaimTx)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedClaimTx(null);
+        }}
+        onClaimed={refresh}
+      />
     </div>
   );
 }
