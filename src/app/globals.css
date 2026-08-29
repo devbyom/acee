@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 220 14% 96%;
+
+    --card: 216 16% 6%;
+    --card-foreground: 220 14% 96%;
+
+    --popover: 216 16% 6%;
+    --popover-foreground: 220 14% 96%;
+
+    --primary: 213 100% 58%; /* #298dff Sui Blue */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 216 11% 8%; /* #131518 */
+    --secondary-foreground: 219 11% 58%;
+
+    --muted: 216 11% 8%;
+    --muted-foreground: 218 10% 33%;
+
+    --accent: 213 100% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 100% 62%; /* #ff3d3d */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 213 100% 58%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 218 15% 13%; /* #1c2026 */
+    --input: 216 11% 8%;
+    --ring: 213 100% 58%;
+
+    --radius: 2px;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: #000000;
+    color: #f4f5f7;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
+  }
+}
+
+.sui-bg {
+  background-color: #000000;
+  background-image:
+    radial-gradient(55rem 55rem at 50% -10%, rgba(41, 141, 255, 0.12), transparent 65%),
+    radial-gradient(40rem 40rem at 90% 15%, rgba(41, 141, 255, 0.06), transparent 55%),
+    radial-gradient(35rem 35rem at 10% 85%, rgba(255, 61, 61, 0.03), transparent 60%);
+}
+
+.sui-card {
+  background-color: #0d0f12;
+  border: 1px solid #1c2026;
+  border-radius: 2px;
+  transition: all 0.2s ease-out;
+}
+
+.sui-card:hover {
+  border-color: rgba(41, 141, 255, 0.45);
+  box-shadow: 0 0 24px -6px rgba(41, 141, 255, 0.15);
+}
+
+.mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c2026;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #298dff;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
