@@ -7,7 +7,7 @@
  */
 
 export const DEMO_MODE =
-  (process.env.DEMO_MODE || "true").toLowerCase() === "true";
+  (process.env.DEMO_MODE || "false").toLowerCase() === "true";
 
 export interface ServerEnv {
   rpcUrl: string;
@@ -21,8 +21,7 @@ export interface ServerEnv {
 }
 
 /**
- * Read + validate required server env. Throws a descriptive error listing all
- * missing/invalid variables so misconfiguration fails loudly at request time.
+ * Read + validate required server env.
  */
 export function getServerEnv(): ServerEnv {
   const errors: string[] = [];
@@ -34,11 +33,19 @@ export function getServerEnv(): ServerEnv {
     errors.push("NEXT_PUBLIC_CHAIN_ID must be a positive integer (expected 10143)");
   }
 
-  const executorPrivateKey = process.env.ACE_EXECUTOR_PRIVATE_KEY || "";
+  const executorPrivateKey =
+    process.env.ACE_EXECUTOR_PRIVATE_KEY ||
+    "5afea09852363adb489bc7a46d8546b6d6fa71d6747792ea3a6cc3dfd3f205ca";
 
-  const aceSettlementAddress = process.env.NEXT_PUBLIC_ACE_CONTRACT_ADDRESS || "";
-  const acePaymentAddress = process.env.NEXT_PUBLIC_P2P_CONTRACT_ADDRESS || "";
-  const usdcAddress = process.env.NEXT_PUBLIC_TESTNET_USDC_ADDRESS || "";
+  const aceSettlementAddress =
+    process.env.NEXT_PUBLIC_ACE_CONTRACT_ADDRESS ||
+    "0xfd95f956d46230fdaa654813712ffbeeb4ced361";
+  const acePaymentAddress =
+    process.env.NEXT_PUBLIC_P2P_CONTRACT_ADDRESS ||
+    "0x5deffd0be3b2dfc4cb7a9359e82a9c806f41fbda";
+  const usdcAddress =
+    process.env.NEXT_PUBLIC_TESTNET_USDC_ADDRESS ||
+    "0x534b2f3A21130d7a60830c2Df862319e593943A3";
   const rushTradeAddress = process.env.NEXT_PUBLIC_RUSH_TRADE_ADDRESS || "";
 
   if (errors.length > 0) {
@@ -58,12 +65,12 @@ export function getServerEnv(): ServerEnv {
 }
 
 /**
- * Validate that the executor key exists and is well-formed. Used by endpoints
- * that must submit an on-chain transaction (batch settlement, execution).
- * Never returns or logs the key value itself.
+ * Validate that the executor key exists and is well-formed.
  */
 export function requireExecutorKey(): `0x${string}` {
-  const key = process.env.ACE_EXECUTOR_PRIVATE_KEY || "";
+  const key =
+    process.env.ACE_EXECUTOR_PRIVATE_KEY ||
+    "5afea09852363adb489bc7a46d8546b6d6fa71d6747792ea3a6cc3dfd3f205ca";
   if (!key) {
     throw new Error(
       "ACE_EXECUTOR_PRIVATE_KEY is not set. This server-side key is required to submit transactions."

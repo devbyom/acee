@@ -90,10 +90,10 @@ export function FaucetDialog({
             <div className="border border-[#298dff]/25 bg-[#298dff]/[0.05] p-3 text-xs text-text-secondary" style={{ borderRadius: "2px" }}>
               <div className="flex items-center gap-1.5 font-medium text-[#54a6ff] mb-0.5">
                 <Sparkles className="h-3.5 w-3.5 text-[#298dff]" />
-                <span>Instant Demo Mode</span>
+                <span>Monad Testnet Gas</span>
               </div>
               <p className="text-[11px] text-text-secondary">
-                You can also use the app immediately in Demo Mode without connecting external funds.
+                Request free testnet MON tokens from the official faucet to pay for contract deployment and execution gas.
               </p>
             </div>
           </div>

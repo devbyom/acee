@@ -205,14 +205,7 @@ export function SettleDialog({
                   </div>
                 </div>
 
-                {noExecutor && (
-                  <div className="border border-[#298dff]/30 bg-[#298dff]/10 p-3 text-xs text-text-secondary" style={{ borderRadius: "2px" }}>
-                    <p className="font-medium text-[#54a6ff] mb-0.5">Demo Mode Enabled</p>
-                    <p className="text-[11px]">
-                      Simulates instant Monad settlement with real Merkle hash calculations and batch state updates.
-                    </p>
-                  </div>
-                )}
+
 
                 {error && (
                   <div className="border border-[#ff3d3d]/30 bg-[#ff3d3d]/10 p-2.5 text-xs text-[#ff3d3d]" style={{ borderRadius: "2px" }}>
