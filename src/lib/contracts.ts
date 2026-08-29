@@ -16,7 +16,8 @@ export const TESTNET_USDC_ADDRESS = (process.env
   "0x534b2f3A21130d7a60830c2Df862319e593943A3") as `0x${string}`;
 
 export const RUSH_TRADE_ADDRESS = (process.env
-  .NEXT_PUBLIC_RUSH_TRADE_ADDRESS || "") as `0x${string}` | "";
+  .NEXT_PUBLIC_RUSH_TRADE_ADDRESS ||
+  "0xf20d297680cd451910eaa5fc58e73824d09e4688") as `0x${string}`;
 
 // Circle testnet USDC uses 6 decimals.
 export const USDC_DECIMALS = 6;

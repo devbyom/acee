@@ -46,7 +46,9 @@ export function getServerEnv(): ServerEnv {
   const usdcAddress =
     process.env.NEXT_PUBLIC_TESTNET_USDC_ADDRESS ||
     "0x534b2f3A21130d7a60830c2Df862319e593943A3";
-  const rushTradeAddress = process.env.NEXT_PUBLIC_RUSH_TRADE_ADDRESS || "";
+  const rushTradeAddress =
+    process.env.NEXT_PUBLIC_RUSH_TRADE_ADDRESS ||
+    "0xf20d297680cd451910eaa5fc58e73824d09e4688";
 
   if (errors.length > 0) {
     throw new Error(`Invalid Ace server environment:\n- ${errors.join("\n- ")}`);
